@@ -1,0 +1,37 @@
+---
+alwaysApply: true
+---
+### Feature-First Organization
+- Organize code by features instead of technical layers
+- Each feature is a self-contained module with its own implementation of all layers
+- Core or shared functionality goes in a separate 'core' directory
+- Features should have minimal dependencies on other features
+- Common directory structure for each feature:
+
+
+lib/
+├── core/                          
+│   ├── error/                     # Global error handling, custom exceptions
+│   ├── network/                   # Network config, interceptors, API client
+│   ├── utils/                     # Utility functions, extensions, formatters
+│   └── widgets/                   # Reusable global widgets (e.g. custom buttons)
+├── features/                      
+│   ├── feature_a/                 
+│   │   ├── data/                  
+│   │   │   ├── datasources/       
+│   │   │   │   ├── local/         # Handles local storage: DB, cache, shared prefs
+│   │   │   │   │   └── user_local_data_source.dart
+│   │   │   │   └── remote/        # Handles API requests and remote data fetching
+│   │   │   │       └── user_remote_data_source.dart
+│   │   │   ├── models/            # DTOs (Data Transfer Objects) + JSON serialization
+│   │   │   └── repositories/      # Repository implementations (combine local & remote)
+│   │   ├── domain/                
+│   │   │   ├── entities/          # Business logic objects (pure, no Flutter code)
+│   │   │   ├── repositories/      # Abstract repository interfaces for DI
+│   │   │   └── usecases/          # Business rules, single-responsibility actions
+│   │   └── presentation/          
+│   │       ├── bloc/              # State management (Bloc/Cubit)
+│   │       ├── pages/             # Screens and navigation entry points
+│   │       └── widgets/           # Feature-specific widgets (UI components)
+│   └── feature_b/                 # Same structure for other features
+└── main.dart                      # Application entry point

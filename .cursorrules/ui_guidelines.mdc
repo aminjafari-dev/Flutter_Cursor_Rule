@@ -1,0 +1,77 @@
+---
+alwaysApply: true
+---
+## Core Principles
+*** If you are in the agent mode, write the code and change the code everywhere you want in the code base ***
+
+** WRITE COMMENTS ALL OVER THE APPLICATION SPECIALLY BEFOR DEFINE A CLASS OR FUNCTION AND SAY HOW SHOULD WE USE IT AND MAKE AN EXAMPLE FOR CLARIFYING AND EXPLAIN BEFOR EACH CONDITION, AND SAY HOW IT CAN BE USEFUL IN THIS SNIPET CODE. **
+
+* Use Flutter localization for each strings.
+* Use Gap package for space between the widgets and define all of them in the seprate class and call it GGap
+* Define GScaffold,GText,GButton, and use it instead of use Scaffold widget directly in the code.
+* Create a class and call it ImagePath and write all image path befor use it and use the path from this class.
+* Define theme class and use from them class instead of using color directly in the code.
+* Don't use any custom color, before using color first add it in the app_theme or update and after use it.
+* Write and Modify README.md file for each feature module(Go through the README file and see the structure).
+* Write the local services in the datasource/local
+* Write the remote and APIs in the datasource/remote
+
+### UI Implementation
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:nui/core/locator.dart';
+import 'package:nui/features/login/bloc/login_bloc.dart';
+import 'package:nui/features/login/ui/widgets/login_form.dart';
+import 'package:nui/features/login/ui/widgets/error_widget.dart';
+
+/// The main login page for the login feature.
+class LoginPage extends StatelessWidget {
+  final String userId;
+
+  const LoginPage({super.key, required this.userId});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => getIt<LoginBloc>()..add(LoginEvent.login(userId: userId)),
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Login'),
+          actions: [
+            BlocBuilder<LoginBloc, LoginState>(
+              builder: (context, state) => IconButton(
+                icon: const Icon(Icons.refresh),
+                onPressed: () {
+                  context.read<LoginBloc>().add(const LoginEvent.login(userId: 'retry'));
+                },
+              ),
+            ),
+          ],
+        ),
+        body: BlocListener<LoginBloc, LoginState>(
+          listener: (context, state) {
+            state.login.when(
+              initial: () {},
+              loading: () {},
+              completed: (_) => ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Login successful!')),
+              ),
+              error: (message) => ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Error: $message')),
+              ),
+            );
+          },
+          child: BlocBuilder<LoginBloc, LoginState>(
+            builder: (context, state) => state.login.when(
+              initial: () => const SizedBox(),
+              loading: () => const Center(child: CircularProgressIndicator()),
+              completed: (user) => LoginForm(user: user),
+              error: (message) => ErrorWidget(message: message),
+              orElse: () => const SizedBox(),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

@@ -1,0 +1,149 @@
+---
+alwaysApply: true
+---
+## Coding Standards
+
+### State Management
+- Use `Bloc` for complex event-driven logic to manage the two operations.
+- Use `freezed` to define immutable sealed classes for events in `entity_event.dart` and states in `entity_state.dart`.
+- Define all events in `entity_event.dart` as a single sealed class (e.g., `EntityEvent`) with events for each operation (e.g., `OperationA`, `OperationB`).
+- Define states in `entity_state.dart`, with individual sealed state classes for each operation (e.g., `OperationAState`, `OperationBState`) containing explicit `Initial`, `Loading`, `Completed`, and `Error` states, and a main state class (e.g., `EntityState`) combining them.
+- Implement the BLoC logic in `entity_bloc.dart`, processing events and emitting states using `copyWith` to update only the relevant operation's state.
+- Inject use cases (use placeholder names like `OperationAUseCase`, `OperationBUseCase`) into the BLoC constructor, assuming they return `DataSuccess` or `DataFailed`.
+- Ensure type safety, immutability, and modern Dart syntax, avoiding UI-related logic (e.g., `BuildContext`) in the BLoC.
+- Use `BlocProvider` for dependency injection of the BLoC.
+- Implement `BlocObserver` for logging and debugging (assume a basic implementation exists elsewhere).
+- Add comments for clarity in each file.
+- Use placeholder names for all entities, operations, and use cases (e.g., `EntityModel` for data models).
+- Output three separate code blocks for `entity_bloc.dart`, `entity_event.dart`, and `entity_state.dart`, with no explanations outside the code blocks.
+
+### Example Output
+Here's an example of how the files should look, using placeholder names:
+
+```dart
+// entity_event.dart
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'entity_event.freezed.dart';
+
+/// Sealed class for entity-related events
+@freezed
+class EntityEvent with _$EntityEvent {
+  /// Event to trigger Operation A
+  const factory EntityEvent.operationA({required String param}) = OperationA;
+  /// Event to trigger Operation B
+  const factory EntityEvent.operationB({required String param}) = OperationB;
+}
+```
+
+```dart
+// entity_state.dart
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:project/core/models/entity_model.dart';
+
+part 'entity_state.freezed.dart';
+
+/// State for Operation A
+@freezed
+class OperationAState with _$OperationAState {
+  const factory OperationAState.initial() = OperationAInitial;
+  const factory OperationAState.loading() = OperationALoading;
+  const factory OperationAState.completed(EntityModel data) = OperationACompleted;
+  const factory OperationAState.error(String message) = OperationAError;
+}
+
+/// Main state combining all operation states
+@freezed
+class EntityState with _$EntityState {
+  const factory EntityState({
+    required OperationAState operationA,
+  }) = _EntityState;
+}
+```
+
+```dart
+// entity_bloc.dart
+import 'package:bloc/bloc.dart';
+import 'package:project/core/data_status.dart';
+import 'package:project/features/domain/usecases/operation_a_usecase.dart';
+import 'package:project/features/bloc/entity_event.dart';
+import 'package:project/features/bloc/entity_state.dart';
+
+/// BLoC for managing entity-related operations
+class EntityBloc extends Bloc<EntityEvent, EntityState> {
+  final OperationAUseCase operationAUseCase;
+
+  EntityBloc({
+    required this.operationAUseCase,
+    required this.operationBUseCase,
+  }) : super(EntityState(
+          operationA: const OperationAState.initial(),
+        )) {
+    on<EntityEvent>((event, emit) async {
+      await event.when(
+        operationA: (param) => _onOperationA(param, emit),
+      );
+    });
+  }
+
+  Future<void> _onOperationA(String param, Emitter<EntityState> emit) async {
+    emit(state.copyWith(operationA: const OperationAState.loading()));
+    try {
+      final result = await operationAUseCase.call(params: param);
+      if (result is DataSuccess) {
+        emit(state.copyWith(operationA: OperationAState.completed(result.data!)));
+      } else {
+        emit(state.copyWith(operationA: OperationAState.error(result.error ?? 'Failed Operation A')));
+      }
+    } catch (e) {
+      emit(state.copyWith(operationA: OperationAState.error(e.toString())));
+    }
+  }
+}
+```
+
+### Dependency Injection:
+
+General Rules
+Modularize by Feature:
+
+Organize dependencies by project features (e.g., login, dashboard, notifications) in separate DI files (e.g., login_di.dart).
+Each feature must have its own DI file to register its dependencies.
+The main locator.dart file should only orchestrate the inclusion of feature-specific DI files.
+Clear and Meaningful Naming:
+
+
+Use precise, descriptive names for files and classes (e.g., DashboardBloc instead of Bloc1).
+DI file names should reflect the feature they belong to (e.g., login_di.dart).
+Group Dependencies:
+
+
+If separating into feature-specific files is not feasible, group dependencies in the locator.dart file by type (e.g., services, repositories, use cases, BLoCs).
+Clearly label each group with comments (e.g., // Services).
+Use Singleton for Services and Repositories:
+
+
+Register services and repositories  with registerLazySingleton to ensure a single instance is maintained in memory.
+Register Blocs with registerSingleton.
+Register use cases with either registerFactory (for new instances per call) or registerSingleton (for a single instance), depending on the use case.
+Register Every New Component:
+
+
+Include a brief description above each DI file or section to explain its purpose.
+For complex classes, document their role and usage in comments.
+Memory Management:
+
+
+Ensure dependency registration does not cause memory leaks.
+Use unregister for dependencies (e.g., tokens) that are no longer needed.
+Fictional Examples
+1. Main locator.dart File
+This file only orchestrates the inclusion of feature-specific DI files.
+import 'package:get_it/get_it.dart'; import 'login_di.dart'; import 'dashboard_di.dart'; import 'notifications_di.dart';
+final GetIt locator = GetIt.instance;
+Future setupLocator() async {
+ // Call DI setup for each feature
+ await setupLoginLocator(locator);
+ await setupDashboardLocator(locator);
+ await setupNotificationsLocator(locator);
+}

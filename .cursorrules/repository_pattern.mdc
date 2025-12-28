@@ -1,0 +1,10 @@
+---
+alwaysApply: true
+---
+### Repository Pattern
+- Repositories act as a single source of truth for data
+- Implement caching strategies when appropriate
+- Handle network connectivity issues gracefully
+- Map data models to domain entities
+- Create proper abstractions with well-defined method signatures
+- Handle pagination and data fetching logic

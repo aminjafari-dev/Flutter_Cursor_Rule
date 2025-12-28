@@ -1,0 +1,100 @@
+---
+alwaysApply: true
+---
+### Dependency Injection Implementation:
+General Rules
+
+** I am using clean architector so each feature has specific folder, so add each specific DI file in the root of each feature.
+
+Modularize by Feature:
+
+Organize dependencies by project features (e.g., login, dashboard, notifications) in separate DI files (e.g., login_di.dart).
+Each feature must have its own DI file to register its dependencies.
+The main locator.dart file should only orchestrate the inclusion of feature-specific DI files.
+Clear and Meaningful Naming:
+
+
+Use precise, descriptive names for files and classes (e.g., DashboardBloc instead of Bloc1).
+DI file names should reflect the feature they belong to (e.g., login_di.dart).
+Group Dependencies:
+
+
+If separating into feature-specific files is not feasible, group dependencies in the locator.dart file by type (e.g., services, repositories, use cases, BLoCs).
+Clearly label each group with comments (e.g., // Services).
+Use Singleton for Services and Repositories:
+
+
+Register services and repositories with registerLazySingleton to ensure a single instance is maintained in memory.
+Register BLoCs and use cases with either registerFactory (for new instances per call) or registerSingleton (for a single instance), depending on the use case.
+Register Every New Component:
+
+
+Mandatory: Every new UseCase, Bloc, or Repository created must be registered in the appropriate locator file (either feature-specific or main locator.dart).
+Ensure that all required dependencies for the new component are also registered or already available in the locator.
+Avoid Unnecessary Dependencies:
+
+
+Only register dependencies in the locator that are shared across multiple parts of the project or require centralized management.
+Local dependencies (e.g., for specific widgets) should be managed manually or within the scope of the feature.
+Use Advanced DI Packages (Optional):
+
+
+For large projects, consider using injectable to automate dependency registration and reduce boilerplate.
+If using injectable, annotate classes with appropriate tags (e.g., @lazySingleton, @singleton).
+Documentation and Comments:
+
+
+Include a brief description above each DI file or section to explain its purpose.
+For complex classes, document their role and usage in comments.
+Memory Management:
+
+
+Ensure dependency registration does not cause memory leaks.
+Use unregister for dependencies (e.g., tokens) that are no longer needed.
+Fictional Examples
+1. Main locator.dart File
+This file only orchestrates the inclusion of feature-specific DI files.
+import 'package:get_it/get_it.dart'; import 'login_di.dart'; import 'dashboard_di.dart'; import 'notifications_di.dart';
+final GetIt locator = GetIt.instance;
+Future setupLocator() async {
+ // Call DI setup for each feature
+ await setupLoginLocator(locator);
+ await setupDashboardLocator(locator);
+ await setupNotificationsLocator(locator);
+}
+// Register access token (example for dynamic token management)
+void registerAccessToken(String token) {
+ if (locator.isRegistered()) {
+ locator.unregister();
+ }
+ locator.registerSingleton(token);
+}
+
+final getIt = GetIt.instance;
+
+void initDependencies() {
+  // Core
+  getIt.registerLazySingleton<NetworkInfo>(() => NetworkInfoImpl(getIt<class>()));
+  
+  // Features - User
+  // Data sources
+  getIt.registerLazySingleton<UserRemoteDataSource>(
+    () => UserRemoteDataSourceImpl(client: getIt<Client>()),
+  );
+  getIt.registerLazySingleton<UserLocalDataSource>(
+    () => UserLocalDataSourceImpl(sharedPreferences: getIt<SharedPreference>()),
+  );
+  
+  // Repository
+  getIt.registerLazySingleton<UserRepository>(() => UserRepositoryImpl(
+    remoteDataSource: getIt<remoteDataSource>(),
+    localDataSource: getIt<LocalDataSource>(),
+    networkInfo: getIt<NetworkInfo>(),
+  ));
+  
+  // Use cases
+  getIt.registerLazySingleton(() => GetUser(getIt<repository>()));
+  
+  // Bloc
+  getIt.registerSingletone(() => UserBloc(getUser: getIt<usecase>()));
+}

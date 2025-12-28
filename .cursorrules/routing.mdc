@@ -1,0 +1,28 @@
+---
+alwaysApply: true
+---
+### page rout:
+- Use this structure to register all route mappings in the PageRouter class inside a global page_router.dart file.
+- Create a folder in the core and called router in this folder create page_name and page_rout file.
+🔁 Routing Convention
+All routes must be defined using named routes.
+Pages must be registered in the PageRouter.routes map using PageName.<route> constants.
+🔤 Naming Convention
+Every page must have a route name constant defined in the PageName class.
+Use lowerCamelCase for variable names and UPPER_SNAKE_CASE for constants.
+🛑 Do Not
+❌ Do not use anonymous route navigation like MaterialPageRoute(...)
+❌ Do not hardcode string routes like "/login"
+✅ Example Usage
+Define Page Name
+class PageName {
+  static const String login = "/login";
+}
+Add to PageRouter
+class PageRouter {
+  static Map<String, WidgetBuilder> routes = {
+    PageName.login: (context) => const LoginPage(),
+  };
+}
+Navigate
+Navigator.of(context).pushNamed(PageName.login);

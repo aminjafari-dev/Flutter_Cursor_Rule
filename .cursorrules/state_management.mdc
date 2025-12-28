@@ -1,0 +1,96 @@
+---
+alwaysApply: true
+---
+### State Management Implementation
+- Use `Bloc` for complex event-driven logic to manage multiple operations.
+- Use `freezed` to define immutable sealed classes for events in `entity_event.dart` and states in `entity_state.dart`.
+- Define all events in `entity_event.dart` as a single sealed class (e.g., `EntityEvent`) with events for each operation (e.g., `OperationA`, `OperationB`).
+- Define states in `entity_state.dart`, with individual sealed state classes for each operation (e.g., `OperationAState`, `OperationBState`) containing explicit `Initial`, `Loading`, `Completed`, and `Error` states, and a main state class (e.g., `EntityState`) combining them.
+- Implement the BLoC logic in `entity_bloc.dart`, processing events and emitting states using `copyWith` to update only the relevant operation's state.
+- Inject use cases (use placeholder names like `OperationAUseCase`, `OperationBUseCase`) into the BLoC constructor, assuming they return `DataSuccess` or `DataFailed`.
+- **CRITICAL**: Always use `await` with async operations and add `emit.isDone` safety checks before every `emit` call to prevent "emit was called after an event handler completed normally" errors.
+- Ensure type safety, immutability, and modern Dart syntax, avoiding UI-related logic (e.g., `BuildContext`) in the BLoC.
+- Use `BlocProvider` for dependency injection of the BLoC.
+- Implement `BlocObserver` for logging and debugging (assume a basic implementation exists elsewhere).
+- Add comments for clarity in each file.
+- Use placeholder names for all entities, operations, and use cases (e.g., `EntityModel` for data models).
+- **BLOC PATTERN REQUIREMENTS**:
+  - Event handler must be `async` and await all async operations
+  - Use `await event.when()` with async callbacks for each event
+  - Add `if (!emit.isDone)` checks before every `emit()` call
+  - Handle both success and error cases in result.fold() with safety checks
+- Output three separate code blocks for `entity_bloc.dart`, `entity_event.dart`, and `entity_state.dart`, with no explanations outside the code blocks.
+
+### Example Output
+Here's an example of how the files should look, using placeholder names:
+
+```dart
+// entity_event.dart
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'entity_event.freezed.dart';
+
+/// Sealed class for entity-related events
+@freezed
+class EntityEvent with _$EntityEvent {
+  /// Event to trigger Operation A
+  const factory EntityEvent.operationA({required String param}) = OperationA;
+  /// Event to trigger Operation B
+  const factory EntityEvent.operationB({required String param}) = OperationB;
+}
+```
+
+```dart
+// entity_state.dart
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:project/core/models/entity_model.dart';
+
+part 'entity_state.freezed.dart';
+
+/// State for Operation A
+@freezed
+class OperationAState with _$OperationAState {
+  const factory OperationAState.initial() = OperationAInitial;
+  const factory OperationAState.loading() = OperationALoading;
+  const factory OperationAState.completed(EntityModel data) = OperationACompleted;
+  const factory OperationAState.error(String message) = OperationAError;
+}
+
+/// State for Operation B
+@freezed
+class OperationBState with _$OperationBState {
+  const factory OperationBState.initial() = OperationBInitial;
+  const factory OperationBState.loading() = OperationBLoading;
+  const factory OperationBState.completed(String result) = OperationBCompleted;
+  const factory OperationBState.error(String message) = OperationBError;
+}
+
+/// Main state combining all operation states
+@freezed
+class EntityState with _$EntityState {
+  const factory EntityState({
+    required OperationAState operationA,
+    required OperationBState operationB,
+  }) = _EntityState;
+}
+```
+
+### BLoC Async Operations with Dartz Either
+- **CRITICAL**: Never use `async/await` inside `fold()` callbacks. The fold method expects synchronous callbacks.
+- Extract success/failure status synchronously from fold first, then perform async operations outside.
+- Pattern:
+  ```dart
+  final result = await someUseCase();
+  if (!emit.isDone) {
+    final isSuccess = result.fold((failure) => false, (_) => true);
+    if (isSuccess) {
+      await nextAsyncOperation(); // ✅ Async outside fold
+    } else {
+      final failure = result.fold((f) => f, (_) => null);
+      if (!emit.isDone && failure != null) {
+        emit(ErrorState(message: _mapFailureToMessage(failure)));
+      }
+    }
+  }
+  ```
+- Using `async` inside fold causes event handler to complete early, making `emit.isDone` true and blocking subsequent emissions.

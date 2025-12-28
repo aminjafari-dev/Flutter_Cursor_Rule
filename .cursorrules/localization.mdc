@@ -1,0 +1,65 @@
+---
+alwaysApply: true
+---
+### Flutter localization
+General Rules
+Use flutter_localizations and intl Packages:
+Use the official flutter_localizations package for core localization support in Flutter.
+Use the intl package for formatting strings, dates, numbers, and currencies based on the user's locale.
+Add dependencies to pubspec.yaml:
+yaml
+
+
+
+dependencies:
+  flutter_localizations:
+    sdk: flutter
+  intl: ^0.19.0
+Modularize Localization by Feature:
+Organize localization files by feature (e.g., lib/features/login/l10n/login_l10n.dart, lib/features/dashboard/l10n/dashboard_l10n.dart).
+Each feature should have its own localization class (e.g., LoginLocalizations) to manage its specific strings.
+Use ARB Files for String Management:
+Store translatable strings in .arb files (Application Resource Bundle) under a l10n directory (e.g., lib/l10n/app_en.arb, lib/l10n/app_fa.arb).
+Name files with the format app_[locale].arb (e.g., app_en.arb for English, app_fa.arb for Persian).
+Use clear, descriptive keys for strings (e.g., login_button instead of button1).
+Generate Localization Classes Automatically:
+Use the flutter gen-l10n command to generate localization classes from .arb files.
+Configure the l10n.yaml file in the project root to specify input/output paths and supported locales:
+yaml
+
+
+
+arb-dir: lib/l10n
+template-arb-file: app_en.arb
+output-localization-file: app_localizations.dart
+output-class: AppLocalizations
+nullable-getter: false
+Ensure the generated AppLocalizations class is imported in the app's entry point.
+Support Multiple Locales:
+Define supported locales in the MaterialApp or CupertinoApp using supportedLocales (e.g., [Locale('en'), Locale('fa')]).
+Provide a fallback locale (e.g., Locale('en')) for unsupported locales.
+Use Localizations.of(context, AppLocalizations) to access localized strings in widgets.
+Centralize Locale Management:
+Manage the current locale using a Cubit or Bloc (e.g., LocaleCubit) to handle locale changes dynamically.
+Register the LocaleCubit in the DI system (e.g., getIt<LocaleCubit>()) using registerFactory for per-session instances.
+Persist the user's selected locale in local storage (e.g., using shared_preferences).
+Handle Dynamic Locale Changes:
+Allow users to change the locale at runtime (e.g., via a settings screen).
+Update the app's UI by emitting a new locale state from LocaleCubit and rebuilding the MaterialApp with the new locale.
+Format Dates, Numbers, and Currencies:
+Use intl package methods (e.g., DateFormat, NumberFormat) for locale-specific formatting.
+Access locale-specific formatters via AppLocalizations or directly from intl based on the current locale.
+Avoid Hardcoded Strings:
+Never use hardcoded strings in UI components. All translatable text must come from .arb files.
+For non-translatable strings (e.g., API keys, debug logs), use constants in a separate file (e.g., lib/core/constants.dart).
+Test Localization:
+Write widget tests to verify that UI renders correctly for all supported locales.
+Test locale switching to ensure dynamic updates work without crashes.
+Validate formatting (dates, numbers, currencies) for each locale.
+Accessibility and RTL Support:
+Support right-to-left (RTL) languages (e.g., Persian, Arabic) using Directionality.of(context) and TextDirection.rtl.
+Ensure widgets adapt to RTL layouts (e.g., using Flexible or Row with mainAxisAlignment).
+Test UI for RTL languages to avoid layout issues.
+Documentation and Comments:
+Document the purpose of each .arb file and its keys in a comment at the top.
+Add comments in localization classes or UI code to explain complex string interpolations or formatting.

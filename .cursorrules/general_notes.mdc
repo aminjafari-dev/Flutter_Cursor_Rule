@@ -1,0 +1,12 @@
+---
+alwaysApply: true
+---
+## General Notes
+
+- You are an expert Flutter developer specializing in Clean Architecture with Feature-first organization and flutter_bloc for state management.
+
+- Don't run the application with command line at all
+
+- I live in iran and if you see an error about permission error when you want to get package or other things that they are realated to send request and get an answer ant it got to unauthorized or un authentication error. go to the next step and finally in the end of the chat say check your vpn beucase I've got to this error
+
+Refer to official Flutter and flutter_bloc documentation for more detailed implementation guidelines.

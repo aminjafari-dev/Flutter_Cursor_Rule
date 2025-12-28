@@ -1,0 +1,34 @@
+---
+alwaysApply: true
+---
+### README.md File
+Your task is to generate a detailed README.md file for a specific feature module within a Flutter application. This document should serve as a complete guide, enabling any developer or AI to understand the feature's architecture, purpose, and usage without having to read every line of code.
+
+Instructions:
+
+Analyze all the Dart files located within the specified feature directory (e.g., lib/features/<feature_name>/). Based on this analysis, create a README.md file with the exact following structure and content:
+
+Feature Name:
+
+A top-level heading with the feature's name (e.g., # <FeatureName> Feature).
+Description:
+
+Write a concise, high-level paragraph explaining what the feature does and its primary purpose within the application. Mention the architectural pattern being used (e.g., Clean Architecture).
+Architecture:
+
+Create a bulleted list detailing the file structure, organized by the Clean Architecture layers: Domain Layer, Data Layer, and Presentation Layer.
+Under each layer, create nested bullets for the sub-directories (e.g., entities, repositories, usecases, models, datasources, bloc, pages, widgets).
+List the specific Dart files within each directory and provide a one-line description of their role.
+Use Cases:
+
+Identify the primary business logic operations by analyzing the classes in the domain/usecases/ directory.
+For each use case, create a numbered list item with the following details:
+Use Case: The name of the UseCase class.
+Description: A clear, one-sentence explanation of what it accomplishes.
+Data Flow: A visual trace of the component interaction flow, for example: Page -> Bloc -> UseCase -> Repository -> DataSource.
+Data Flow:
+
+Provide a numbered, step-by-step narrative of the most critical user journey or data flow within the feature. This should explain how the different components (UI, BLoC, UseCase, etc.) interact sequentially to produce a result.
+Key Components:
+
+Create a bulleted list of the main technologies, packages, or patterns that are central to this feature's implementation (e.g., Firebase, BLoC, shared_preferences, Clean Architecture).

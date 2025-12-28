@@ -1,0 +1,10 @@
+---
+alwaysApply: true
+---
+### Testing Strategy
+- Write unit tests for domain logic, repositories, and Blocs
+- Implement integration tests for features
+- Create widget tests for UI components
+- Use mocks for dependencies with mockito or mocktail
+- Follow Given-When-Then pattern for test structure
+- Aim for high test coverage of domain and data layers
