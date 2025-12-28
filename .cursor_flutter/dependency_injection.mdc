@@ -25,7 +25,8 @@ Use Singleton for Services and Repositories:
 
 
 Register services and repositories with registerLazySingleton to ensure a single instance is maintained in memory.
-Register BLoCs and use cases with either registerFactory (for new instances per call) or registerSingleton (for a single instance), depending on the use case.
+Register BLoCs with registerFactory to create a new instance for each screen/widget tree, ensuring proper state isolation and preventing state pollution between different screens.
+Register use cases with either registerFactory (for new instances per call) or registerSingleton (for a single instance), depending on the use case.
 Register Every New Component:
 
 
@@ -96,5 +97,5 @@ void initDependencies() {
   getIt.registerLazySingleton(() => GetUser(getIt<repository>()));
   
   // Bloc
-  getIt.registerSingletone(() => UserBloc(getUser: getIt<usecase>()));
+  getIt.registerFactory(() => UserBloc(getUser: getIt<usecase>()));
 }
